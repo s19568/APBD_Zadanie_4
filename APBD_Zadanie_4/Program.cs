@@ -1,44 +1,50 @@
+// This call WebApplication.CreateBuilder() creates an object that represents our application 
+// This variable allows our application to be configured before it will be excecuted
+// Builder pattern - design patter (classic design patterns of objective programming
 var builder = WebApplication.CreateBuilder(args);
 
+
+// We define the element in IoC container
 // Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddControllers();
+// This element is searching for our application and all the enpoints that we have defined
+// GET /api/students - resource + what we want to do with this resource => endpoint
 builder.Services.AddEndpointsApiExplorer();
+// This element allows me to add automatically generated documentation for my application
 builder.Services.AddSwaggerGen();
 
+// This .Build(); method returns an application that is being configured according to what we have previously defined
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
+//2. Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    // This element is basically a sample documentation that is automatically generated only available in our application
+    // if it is running in development mode
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+// Minimal API
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+//var students = new List<Animal>();
+//{
+//new Animal { Id = 1, FirstName = "John", LastName = "Doe" };
+//new Animal { Id = 2, FirstName = "Jane", LastName = "Test" };
+//};
+
+//app.MapGet("/api/students", () =>
+//{
+//      Some logic
+//      return Results.Ok(students); // 200 HTTP response - OK
+//});
+
+app.MapControllers();
 
 app.Run();
 
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+
+
