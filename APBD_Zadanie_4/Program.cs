@@ -1,46 +1,81 @@
 // This call WebApplication.CreateBuilder() creates an object that represents our application 
 // This variable allows our application to be configured before it will be excecuted
 // Builder pattern - design patter (classic design patterns of objective programming
+
+using APBD_Zadanie_4;
+
 var builder = WebApplication.CreateBuilder(args);
 
-
-// We define the element in IoC container
-// Add services to the container.
 builder.Services.AddControllers();
-// This element is searching for our application and all the enpoints that we have defined
-// GET /api/students - resource + what we want to do with this resource => endpoint
+
 builder.Services.AddEndpointsApiExplorer();
-// This element allows me to add automatically generated documentation for my application
+
 builder.Services.AddSwaggerGen();
 
-// This .Build(); method returns an application that is being configured according to what we have previously defined
 var app = builder.Build();
 
 
-//2. Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    // This element is basically a sample documentation that is automatically generated only available in our application
-    // if it is running in development mode
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 
-// Minimal API
+app.MapGet("/animals", () =>
+{
+    var animals = AnimalsDataStore.Current.GetAnimals();
+    return Results.Ok(animals);
+});
 
-//var students = new List<Animal>();
-//{
-//new Animal { Id = 1, FirstName = "John", LastName = "Doe" };
-//new Animal { Id = 2, FirstName = "Jane", LastName = "Test" };
-//};
+app.MapGet("/animals/{id}", (int id) =>
+{
+    var animal = AnimalsDataStore.Current.GetAnimalById(id);
+    return animal?.Id != null ? Results.Ok(animal) : Results.NotFound();
+});
 
-//app.MapGet("/api/students", () =>
-//{
-//      Some logic
-//      return Results.Ok(students); // 200 HTTP response - OK
-//});
+app.MapPost("/animals", (Animal animal) =>
+{
+    AnimalsDataStore.Current.AddAnimal(animal);
+    return Results.Created($"/animals/{animal.Id}", animal);
+});
+
+app.MapPut("/animals/{id}", (int id, Animal animal) =>
+{
+    if (AnimalsDataStore.Current.UpdateAnimal(id, animal))
+        return Results.Ok();
+    else
+        return Results.NotFound();
+});
+
+app.MapDelete("/animals/{id}", (int id) =>
+{
+    if (AnimalsDataStore.Current.DeleteAnimal(id))
+        return Results.Ok();
+    else
+        return Results.NotFound();
+});
+
+app.MapGet("/visits/{animalId}", (int animalId) =>
+{
+    var visits = VisitDataStore.Current.GetVisitsByAnimalId(animalId);
+    return Results.Ok(visits);
+});
+
+app.MapPost("/visits", (Visit visit) =>
+{
+    VisitDataStore.Current.AddVisit(visit);
+    return Results.Created($"/visits/{visit.visit_ID}", visit);
+});
+
+//Get's all visits and display all animals
+//
+// app.MapGet("/visits", () =>
+// {
+//     var visits = VisitDataStore.Current.GetAllVisits();
+//     return Results.Ok(visits);
+// });
 
 app.MapControllers();
 
