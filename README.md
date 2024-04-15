@@ -1,1 +1,1 @@
-#Small REST API for Animals DataBase
+Small REST API for Animals DataBase
